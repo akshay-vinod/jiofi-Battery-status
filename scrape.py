@@ -3,9 +3,11 @@ from bs4 import BeautifulSoup
 import smtplib
 import time
 from pygame import mixer
-mixer.init()
-mixer.music.load('846_download_battery_low_ringtone.mp3')
-mixer.music.play()
+def play():
+    mixer.init()
+    mixer.music.load('846_download_battery_low_ringtone.mp3')
+    mixer.music.play()
+    print("CONNECT YOUR CHARGER!!")
 def check_battery():
     url = "http://jiofi.local.html/"
 
@@ -19,31 +21,35 @@ def check_battery():
     # fetch battery percentage
     battery = soup.select_one('#batterylevel')['value']
     print(battery)
+    percentageNum = int(''.join(filter(lambda i: i.isdigit(), battery)))
+    if(percentageNum < 10):
+        play()
+
 
     
-
+""" send email at low battery level
 def send_mail():
-        # creates SMTP session
+        creates SMTP session
         s = smtplib.SMTP('smtp.gmail.com', 587)
 
-        # start TLS for security
+        start TLS for security
         s.starttls()
 
-        # Authentication
+        Authentication
         s.login("sender_email_id", "sender_email_id_password") 
 
-        # message to be sent
-        message = "PRICE CHANGED CHECK NOW "
+        message to be sent
+        message = " "
 
-        # sending the mail
+        sending the mail
         s.sendmail("sender_email_id", "receiver_email_id", message)
 
-        # terminating the session
+        terminating the session
         s.quit()
-        print("email has been send")
+        print("email has been send") """
 while(True):
      check_battery()
-     time.sleep(30) #check price in every 1 min
+     time.sleep(60) #check price in every 1 min
 
 
         
