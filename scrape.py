@@ -13,8 +13,10 @@ def check_battery():
     soup =  BeautifulSoup(page.content, 'html.parser') #load site content
 
     # fetch battery percentage
-    battery = soup.find('div', id="batterylevel")
+    battery = soup.select_one('#batterylevel')['value']
     print(battery)
+    
+
 def send_mail():
         # creates SMTP session
         s = smtplib.SMTP('smtp.gmail.com', 587)
@@ -35,8 +37,8 @@ def send_mail():
         s.quit()
         print("email has been send")
 while(True):
-    check_battery()
-    time.sleep(1) #check price in every 1 min
+     check_battery()
+     time.sleep(30) #check price in every 1 min
 
 
         
