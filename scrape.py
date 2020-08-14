@@ -2,6 +2,10 @@ import requests
 from bs4 import BeautifulSoup
 import smtplib
 import time
+from pygame import mixer
+mixer.init()
+mixer.music.load('846_download_battery_low_ringtone.mp3')
+mixer.music.play()
 def check_battery():
     url = "http://jiofi.local.html/"
 
@@ -15,6 +19,7 @@ def check_battery():
     # fetch battery percentage
     battery = soup.select_one('#batterylevel')['value']
     print(battery)
+
     
 
 def send_mail():
