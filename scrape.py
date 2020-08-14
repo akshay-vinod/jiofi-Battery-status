@@ -13,7 +13,7 @@ def check_battery():
     soup =  BeautifulSoup(page.content, 'html.parser') #load site content
 
     # fetch battery percentage
-    battery = soup.find('label', id="lDashBatteryQuantity")
+    battery = soup.find('div', id="batterylevel")
     print(battery)
 def send_mail():
         # creates SMTP session
