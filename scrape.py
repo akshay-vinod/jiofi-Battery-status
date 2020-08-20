@@ -1,4 +1,5 @@
 import requests
+import time
 from bs4 import BeautifulSoup
 import smtplib
 import time
@@ -20,7 +21,7 @@ def check_battery():
 
     # fetch battery percentage
     battery = soup.select_one('#batterylevel')['value']
-    print(battery)
+    print(battery +" " +time.strftime("%H:%M:%S"))
     percentageNum = int(''.join(filter(lambda i: i.isdigit(), battery)))
     if(percentageNum < 10):
         play()
