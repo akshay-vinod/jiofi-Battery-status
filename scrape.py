@@ -46,17 +46,16 @@ def check_battery():
 
     # fetch battery percentage
     batterylvl = soup.select_one('#batterylevel')['value']
-    # fetch battery connected to battery or not
-    battery_connection_status = soup.select_one('#batterystatus')['value']
     print(batterylvl + " " + time.strftime("%H:%M:%S"))
     percentageNum = int(''.join(filter(lambda i: i.isdigit(), batterylvl)))
-    if(percentageNum < 10):
+
+    if(percentageNum < 11):
         playlowbattery()
+
     elif(percentageNum == 100):
         batterystate = 1
     if(percentageNum != 100):
         batterystate = 2
-    connection_status(battery_connection_status)
     return batterystate
 
 
@@ -64,15 +63,25 @@ charging_flag = 0
 discharging_flag = 0
 
 
-def connection_status(status):
+def connection_status():
     global discharging_flag, charging_flag
-    if(status == "Discharging"):
+    url = "http://jiofi.local.html/"
+
+    headers = {
+        "User-Agent": 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.125 Safari/537.36'}
+
+    page = requests.get(url, headers=headers)
+
+    soup = BeautifulSoup(page.content, 'html.parser')  # load site content
+    # fetch battery connected to battery or not
+    battery_connection_status = soup.select_one('#batterystatus')['value']
+    if(battery_connection_status == "Discharging"):
         charging_flag = 0
         if(discharging_flag == 0):
             playdischarging()
             print("Discharging")
             discharging_flag = discharging_flag+1
-    elif(status == "Charging"):
+    elif(battery_connection_status == "Charging"):
         discharging_flag = 0
         if(charging_flag == 0):
             playcharging()
@@ -101,12 +110,27 @@ def send_mail():
         s.quit()
         print("email has been send") """
 n = 0
+count = 0
 while(True):
-    batteryState = check_battery()
-    if(batteryState == 2):
-        n = 0
-    elif(batteryState == 1):
-        if(n == 0):
-            playbatteryfull()
-            n = n+1
+    # on first sec calling checkbattery
+    if(count == 0):
+        batteryState = check_battery()
+        if(batteryState == 2):
+            n = 0
+        elif(batteryState == 1):
+            if(n == 0):
+                playbatteryfull()
+                n = n+1
+    connection_status()
+    # after 39 sec calling checkbattery
+    if(count == 40):
+        batteryState = check_battery()
+        if(batteryState == 2):
+            n = 0
+        elif(batteryState == 1):
+            if(n == 0):
+                playbatteryfull()
+                n = n+1
+        count = 1
+    count += 1
     time.sleep(1)  # check price in every 1 min
