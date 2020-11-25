@@ -1,9 +1,12 @@
+from pygame import mixer
 import requests
 import time
 from bs4 import BeautifulSoup
 import smtplib
+import pygame
 import time
-from pygame import mixer
+from os import environ
+environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 
 
 def playlowbattery():
@@ -46,15 +49,15 @@ def check_battery():
 
     # fetch battery percentage
     batterylvl = soup.select_one('#batterylevel')['value']
-    print(batterylvl + " " + time.strftime("%H:%M:%S"))
+    print("->"+batterylvl + " " + time.strftime("%H:%M:%S"))
     percentageNum = int(''.join(filter(lambda i: i.isdigit(), batterylvl)))
 
-    if(percentageNum < 11):
+    if(percentageNum < 11 and charging_flag==0):
         playlowbattery()
 
     elif(percentageNum == 100):
         batterystate = 1
-    if(percentageNum != 100):
+    if(percentageNum != 100 and percentageNum>10):
         batterystate = 2
     return batterystate
 
@@ -75,6 +78,7 @@ def connection_status():
     soup = BeautifulSoup(page.content, 'html.parser')  # load site content
     # fetch battery connected to battery or not
     battery_connection_status = soup.select_one('#batterystatus')['value']
+    #playing cherging or discharging only once
     if(battery_connection_status == "Discharging"):
         charging_flag = 0
         if(discharging_flag == 0):
@@ -111,26 +115,29 @@ def send_mail():
         print("email has been send") """
 n = 0
 count = 0
-while(True):
-    # on first sec calling checkbattery
-    if(count == 0):
-        batteryState = check_battery()
-        if(batteryState == 2):
-            n = 0
-        elif(batteryState == 1):
-            if(n == 0):
-                playbatteryfull()
-                n = n+1
-    connection_status()
-    # after 39 sec calling checkbattery
-    if(count == 40):
-        batteryState = check_battery()
-        if(batteryState == 2):
-            n = 0
-        elif(batteryState == 1):
-            if(n == 0):
-                playbatteryfull()
-                n = n+1
-        count = 1
-    count += 1
-    time.sleep(1)  # check price in every 1 min
+for i in range(5):
+    while(True):
+        connection_status()
+        # on first sec calling checkbattery
+        #play battery full only once
+        if(count == 0):
+            batteryState = check_battery()
+            if(batteryState == 2):
+                n = 0
+            elif(batteryState == 1):
+                if(n == 0):
+                    playbatteryfull()
+                    n = n+1
+        # after 39 sec calling checkbattery
+        if(count == 40):
+            batteryState = check_battery()
+            if(batteryState == 2):
+                n = 0
+            elif(batteryState == 1):
+                if(n == 0):
+                    playbatteryfull()
+                    n = n+1
+            count = 1
+        count += 1
+        time.sleep(1)  # check price in every 1 min
+time.sleep(50)
